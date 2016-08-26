@@ -14,15 +14,8 @@ if [[ $(arch) != 'x86_64' ]]; then
 fi
 
 issue=$(cat /etc/issue)
-extra_packages=
-current=0
-if [[ $issue =~ ^Ubuntu\ 16\.04 ]]; then
-    extra_packages=libiberty-dev
-    current=1
-else
-    echo "Ubuntu 16.04 required" >&2
-    exit 1
-fi
+extra_packages=libiberty-dev
+current=1
 
 dir=$(mktemp --tmpdir -d fblualib-build.XXXXXX)
 
@@ -85,7 +78,7 @@ echo
 cd $dir/folly/folly
 autoreconf -ivf
 ./configure
-make
+make -j24
 sudo make install
 sudo ldconfig
 
@@ -95,8 +88,9 @@ if [ $current -eq 1 ]; then
     echo
 
     cd $dir/wangle/wangle
+    git checkout d89a94139e57673abd32a78e9f371f4badbab36c
     cmake .
-    make
+    make -j24
     sudo make install
 fi
 
@@ -107,12 +101,7 @@ echo
 cd $dir/fbthrift/thrift
 autoreconf -ivf
 ./configure
-if [ $current -eq 1 ]; then
-    pushd lib/cpp2/fatal/internal
-    ln -s folly_dynamic-inl-pre.h folly_dynamic-inl.h
-    popd
-fi
-make
+make -j24
 sudo make install
 
 echo
@@ -135,11 +124,11 @@ echo
 echo 'Almost done!'
 echo
 
-git clone https://github.com/torch/nn && ( cd nn && git checkout getParamsByDevice && luarocks make rocks/nn-scm-1.rockspec )
+git clone https://github.com/torch/nn && ( cd nn && git checkout getParamsByDevice && luarocks make -j24 rocks/nn-scm-1.rockspec )
 
-git clone https://github.com/facebook/fbtorch.git && ( cd fbtorch && luarocks make rocks/fbtorch-scm-1.rockspec )
+git clone https://github.com/facebook/fbtorch.git && ( cd fbtorch && luarocks make -j24 rocks/fbtorch-scm-1.rockspec )
 
-git clone https://github.com/facebook/fbnn.git && ( cd fbnn && luarocks make rocks/fbnn-scm-1.rockspec )
+git clone https://github.com/facebook/fbnn.git && ( cd fbnn && luarocks make -j24 rocks/fbnn-scm-1.rockspec )
 
 
 echo

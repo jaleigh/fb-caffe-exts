@@ -184,5 +184,5 @@ def format_output(outputs):
 
 def debug_net(caffe_net):
     for blob_name, blob in caffe_net.blobs.iteritems():
-        log.info("Blob Name: %s, %s, Sum: %s",
+        log.info("Blob Name: %s, %s, Sum: %lf",
                  blob_name, blob.data.shape, blob.data.sum())

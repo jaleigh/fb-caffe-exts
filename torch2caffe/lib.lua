@@ -24,6 +24,7 @@ function M.evaluate_caffe(caffe_net, inputs)
         local input_spec = inputs[i]
         input_kwargs[input_spec.name] = input_spec.tensor
     end
+    --print("Caffe data going in ", inputs[1].tensor:float():sum());
     local py_caffe_output = caffe_net.forward(py.kwargs, input_kwargs)
     local caffe_output_list = py.reval(t2c.format_output(py_caffe_output))
     local caffe_output_length = py.eval("len(a)", {a=caffe_output_list})
@@ -97,11 +98,13 @@ function M.compare(opts, torch_net)
     end
     local torch_outputs
     -- Some networks only accept CUDA input.
+    --print("torch input sum %f", inputs[1].tensor:type('torch.FloatTensor'):float():sum())
+
     local ok, err = pcall(function()
             torch_net:float()
             local torch_inputs = inputs_to_torch_inputs(
                 inputs, 'torch.FloatTensor')
-            torch_outputs = torch_net:forward(torch_inputs)
+            torch_outputs = torch_net:float():forward(torch_inputs)
     end)
     if not ok then
         print("\n\n\nGot error running forward: %s", err)
@@ -137,7 +140,7 @@ function M.compare(opts, torch_net)
         end
 
         local max_absolute_error = (caffe_output - torch_output):abs():max()
-        print("Maximum difference between Caffe and Torch output: %s",
+        print("Maximum difference between Caffe and Torch output: %f",
                       max_absolute_error)
         if 1 then --(max_absolute_error > 0.001) then
             debug_nets(caffe_net, torch_net)
@@ -145,6 +148,7 @@ function M.compare(opts, torch_net)
                 require('fb.debugger').enter()
             end
             if (max_absolute_error > 0.001) then  
+                print("max absolute error %f", max_absolute_error)
                 error("Error in conversion!")
             end
         end

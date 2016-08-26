@@ -54,15 +54,17 @@ g_t2c_preprocess = function(model, opts)
         model = model.net
     end
     model = cudnn.convert(model, nn)
+    model = trans.fold_batch_normalization_layers(model, opts)
     model=nn.utils.recursiveType(model, 'torch.FloatTensor')
     for _, layer in pairs(model:findModules('nn.SpatialBatchNormalization')) do
-        if 1 layer.save_mean==nil then
+        if 1 then
             layer.save_mean = layer.running_mean
             layer.save_std = layer.running_var
             layer.save_std:pow(-0.5)
         end
         --layer.train = true
     end
+    --adapt_conv1(model.modules[1])
     adapt_spatial_dropout(model)
     return model
 end

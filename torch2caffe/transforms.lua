@@ -24,7 +24,6 @@ local function fold_sequential_batch_norm_layer(model)
                 print(("Got bn layer: %s, skipping"):format(layer_type))
                 return
             end
-
             if i + 1 > #model.modules then
                 new_model:add(
                     M.fold_batch_normalization_layers(model.modules[i]))
@@ -55,6 +54,9 @@ local function fold_sequential_batch_norm_layer(model)
 
             -- ((a * x + b) - m) * std => a * std * x + (b-m) * std
             local new_module = model.modules[i]
+            if not new_module.bias then
+                new_module.bias = torch.zeros(mean:size()):float()
+            end
             new_module.bias:add(-1, mean)
             new_module.bias:cmul(std)
             local buf = nil

@@ -13,7 +13,7 @@ local path = arg[1]
 local basename = paths.basename(path, 't7b')
 local ext = path:match("^.+(%..+)$")
 local model = nil
-if ext == '.t7b' then 
+if ext == '.t7' then 
     model = torch.load(path)
     model2 = torch.load(path)
 elseif ext == '.txt' then

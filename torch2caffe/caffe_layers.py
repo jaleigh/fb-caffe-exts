@@ -173,11 +173,12 @@ def pooling(torch_layer):
         return layer
 
     if not torch_layer["ceil_mode"]:
+        print("modifing pooling layer \n\n\n\n")
         # layer.pooling_param.torch_pooling = True
         if dH > 1 and padH > 0:
-            layer.pooling_param.pad_h = padH - 1
+            layer.pooling_param.pad_h = padH# - 1
         if dW > 1 and padW > 0:
-            layer.pooling_param.pad_w = padW - 1
+            layer.pooling_param.pad_w = padW# - 1
     return layer
 
 
